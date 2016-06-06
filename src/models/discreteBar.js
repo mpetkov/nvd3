@@ -51,6 +51,14 @@ nv.models.discreteBar = function() {
                 series.values.forEach(function(point) {
                     point.series = i;
                 });
+
+                // Changes the availableWidth to allow for a minimum bar width
+                if(minBarWidth) {
+                    var minWidth = series.values.length * minBarWidth * 1.1;
+                    if(availableWidth < minWidth) {
+                        availableWidth = minWidth;
+                    }
+                }
             });
 
             // Setup Scales
@@ -173,12 +181,11 @@ nv.models.discreteBar = function() {
                 bars.selectAll('text').remove();
             }
 
+            // Calculates the bar width offset needed to satisfy a maxBarWidth
             var barWidth = x.rangeBand() * .9 / data.length;
             var barWidthOffset = 0;
             if(maxBarWidth && barWidth > maxBarWidth) {
                 barWidthOffset = barWidth - maxBarWidth;
-            }else if(minBarWidth && barWidth < minBarWidth) {
-                barWidthOffset = barWidth - minBarWidth;
             }
 
             bars
