@@ -3875,6 +3875,7 @@ nv.models.discreteBar = function() {
         , height = 500
         , maxBarWidth
         , minBarWidth
+        , minBarHeight = 1
         , id = Math.floor(Math.random() * 10000) //Create semi-unique ID in case user doesn't select one
         , container
         , x = d3.scale.ordinal()
@@ -4054,7 +4055,7 @@ nv.models.discreteBar = function() {
             }
 
             bars
-                .attr('class', function(d,i) { return getY(d,i) < 0 ? 'nv-bar negative' : 'nv-bar positive' })
+                .attr('class', function(d,i) { return getY(d,i) < 0 ? 'nv-bar negative' : getY(d,i) > 0 ? 'nv-bar positive' : 'nv-bar empty' })
                 .style('fill', function(d,i) { return d.color || color(d,i) })
                 .style('stroke', function(d,i) { return d.color || color(d,i) })
                 .select('rect')
@@ -4068,15 +4069,15 @@ nv.models.discreteBar = function() {
                     var left = x(getX(d,i)) + x.rangeBand() * .05,
                         top = getY(d,i) < 0 ?
                             y(0) :
-                                y(0) - y(getY(d,i)) < 1 ?
-                            y(0) - 1 : //make 1 px positive bars show up above y=0
+                                y(0) - y(getY(d,i)) < minBarHeight ?
+                            y(0) - minBarHeight*0.5 : //make 1 px positive bars show up above y=0
                             y(getY(d,i));
 
                     return 'translate(' + left + ', ' + top + ')'
                 })
                 .select('rect')
                 .attr('height', function(d,i) {
-                    return  Math.max(Math.abs(y(getY(d,i)) - y(0)), 1)
+                    return  Math.max(Math.abs(y(getY(d,i)) - y(0)), minBarHeight)
                 });
 
 
@@ -4104,6 +4105,7 @@ nv.models.discreteBar = function() {
         height:  {get: function(){return height;}, set: function(_){height=_;}},
         maxBarWidth: {get: function(){return maxBarWidth;}, set: function(_){maxBarWidth=_;}},
         minBarWidth: {get: function(){return minBarWidth;}, set: function(_){minBarWidth=_;}},
+        minBarHeight: {get: function(){return minBarHeight;}, set: function(_){minBarHeight=_;}},
         forceY:  {get: function(){return forceY;}, set: function(_){forceY=_;}},
         showValues: {get: function(){return showValues;}, set: function(_){showValues=_;}},
         x:       {get: function(){return getX;}, set: function(_){getX=_;}},
