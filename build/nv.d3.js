@@ -1,4 +1,4 @@
-/* nvd3 version 1.8.3-dev (https://github.com/novus/nvd3) 2016-04-26 */
+/* nvd3 version 1.8.3-dev (https://github.com/novus/nvd3) 2016-06-06 */
 (function(){
 
 // set up main nv object
@@ -3873,6 +3873,8 @@ nv.models.discreteBar = function() {
     var margin = {top: 0, right: 0, bottom: 0, left: 0}
         , width = 960
         , height = 500
+        , maxBarWidth
+        , minBarWidth
         , id = Math.floor(Math.random() * 10000) //Create semi-unique ID in case user doesn't select one
         , container
         , x = d3.scale.ordinal()
@@ -4035,6 +4037,14 @@ nv.models.discreteBar = function() {
                 bars.selectAll('text').remove();
             }
 
+            var barWidth = x.rangeBand() * .9 / data.length;
+            var barWidthOffset = 0;
+            if(maxBarWidth && barWidth > maxBarWidth) {
+                barWidthOffset = barWidth - maxBarWidth;
+            }else if(minBarWidth && barWidth < minBarWidth) {
+                barWidthOffset = barWidth - minBarWidth;
+            }
+
             bars
                 .attr('class', function(d,i) { return getY(d,i) < 0 ? 'nv-bar negative' : 'nv-bar positive' })
                 .style('fill', function(d,i) { return d.color || color(d,i) })
@@ -4042,7 +4052,8 @@ nv.models.discreteBar = function() {
                 .select('rect')
                 .attr('class', rectClass)
                 .watchTransition(renderWatch, 'discreteBar: bars rect')
-                .attr('width', x.rangeBand() * .9 / data.length);
+                .attr('width', barWidth - barWidthOffset)
+                .attr('x', barWidthOffset*0.5);;
             bars.watchTransition(renderWatch, 'discreteBar: bars')
                 //.delay(function(d,i) { return i * 1200 / data[0].values.length })
                 .attr('transform', function(d,i) {
@@ -4082,6 +4093,8 @@ nv.models.discreteBar = function() {
         // simple options, just get/set the necessary values
         width:   {get: function(){return width;}, set: function(_){width=_;}},
         height:  {get: function(){return height;}, set: function(_){height=_;}},
+        maxBarWidth: {get: function(){return maxBarWidth;}, set: function(_){maxBarWidth=_;}},
+        minBarWidth: {get: function(){return minBarWidth;}, set: function(_){minBarWidth=_;}},
         forceY:  {get: function(){return forceY;}, set: function(_){forceY=_;}},
         showValues: {get: function(){return showValues;}, set: function(_){showValues=_;}},
         x:       {get: function(){return getX;}, set: function(_){getX=_;}},
@@ -9903,15 +9916,17 @@ nv.models.multiChart = function() {
                         });
                     });
 
+                    var defaultValueFormatter = function(d,i) {
+                        var yAxis = allData[i].yAxis;
+                        return d == null ? "N/A" : yAxis.tickFormat()(d);
+                    };
+
                     interactiveLayer.tooltip
                     .chartContainer(chart.container.parentNode)
                     .headerFormatter(function(d, i) {
                         return xAxis.tickFormat()(d, i);
                     })
-                    .valueFormatter(function(d,i) {
-                        var yAxis = allData[i].yAxis;
-                        return d === null ? "N/A" : yAxis.tickFormat()(d);
-                    })
+                    .valueFormatter(interactiveLayer.tooltip.valueFormatter() || defaultValueFormatter)
                     .data({
                         value: chart.x()( singlePoint,pointIndex ),
                         index: pointIndex,
@@ -12097,14 +12112,16 @@ nv.models.scatter = function() {
                             if (needsUpdate || !data[d.series]) return 0; //check if this is a dummy point
                             var series = data[d.series],
                                 point  = series.values[i];
-
+                            var element = this;
                             dispatch.elementClick({
                                 point: point,
                                 series: series,
                                 pos: [x(getX(point, i)) + margin.left, y(getY(point, i)) + margin.top], //TODO: make this pos base on the page
                                 relativePos: [x(getX(point, i)) + margin.left, y(getY(point, i)) + margin.top],
                                 seriesIndex: d.series,
-                                pointIndex: i
+                                pointIndex: i,
+                                event: d3.event,
+                                element: element
                             });
                         })
                         .on('dblclick', function(d,i) {
