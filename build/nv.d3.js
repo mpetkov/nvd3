@@ -3884,6 +3884,7 @@ nv.models.discreteBar = function() {
         , forceY = [0] // 0 is forced by default.. this makes sense for the majority of bar graphs... user can always do chart.forceY([]) to remove
         , color = nv.utils.defaultColor()
         , showValues = false
+        , valueLabel = function(d) { return d.y }
         , valueFormat = d3.format(',.2f')
         , xDomain
         , yDomain
@@ -4035,7 +4036,7 @@ nv.models.discreteBar = function() {
                 ;
 
                 bars.select('text')
-                    .text(function(d,i) { return valueFormat(getY(d,i)) })
+                    .text(function(d,i) { return valueFormat(valueLabel(d,i)) })
                     .watchTransition(renderWatch, 'discreteBar: bars text')
                     .attr('x', x.rangeBand() * .9 / 2)
                     .attr('y', function(d,i) { return getY(d,i) < 0 ? y(getY(d,i)) - y(0) + 12 : -4 })
@@ -4113,6 +4114,7 @@ nv.models.discreteBar = function() {
         xRange:  {get: function(){return xRange;}, set: function(_){xRange=_;}},
         yRange:  {get: function(){return yRange;}, set: function(_){yRange=_;}},
         valueFormat:    {get: function(){return valueFormat;}, set: function(_){valueFormat=_;}},
+        valueLabel:       {get: function(){return valueLabel;}, set: function(_){valueLabel=_;}},
         id:          {get: function(){return id;}, set: function(_){id=_;}},
         rectClass: {get: function(){return rectClass;}, set: function(_){rectClass=_;}},
 
