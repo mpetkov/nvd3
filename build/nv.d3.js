@@ -4087,6 +4087,7 @@ nv.models.discreteBar = function() {
         });
 
         renderWatch.renderEnd('discreteBar immediate');
+        chart.dispatch.renderEnd();
         return chart;
     }
 
