@@ -205,8 +205,10 @@ nv.models.discreteBar = function() {
                     var left = x(getX(d,i)) + x.rangeBand() * .05,
                         top = getY(d,i) < 0 ?
                             y(0) :
-                                y(0) - y(getY(d,i)) < minBarHeight ?
-                            y(0) - minBarHeight*0.5 : //make 1 px positive bars show up above y=0
+                            getY(d,i) > 0 && y(0) - y(getY(d,i)) < minBarHeight ?
+                            y(0) - minBarHeight : //make positive bars show up above y=0
+                            y(0) - y(getY(d,i)) < minBarHeight ?
+                            y(0) - minBarHeight*0.5 : //make empty bars show up half above 0 and half below
                             y(getY(d,i));
 
                     return 'translate(' + left + ', ' + top + ')'
