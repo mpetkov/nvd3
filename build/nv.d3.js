@@ -1,4 +1,4 @@
-/* nvd3 version 1.8.3-dev (https://github.com/novus/nvd3) 2016-06-07 */
+/* nvd3 version 1.8.3-dev (https://github.com/novus/nvd3) 2016-07-07 */
 (function(){
 
 // set up main nv object
@@ -4031,6 +4031,12 @@ nv.models.discreteBar = function() {
                 .attr('height', 0)
                 .attr('width', x.rangeBand() * .9 / data.length )
 
+            var barHeight = Math.max(Math.abs(y(getY(d,i)) - y(0)));
+            var textYOffset = 0;
+            if(barHeight < minBarHeight) {
+                textYOffset = minBarHeight - barHeight;
+                barHeight = minBarHeight;
+            }
             if (showValues) {
                 barsEnter.append('text')
                     .attr('text-anchor', 'middle')
@@ -4040,7 +4046,7 @@ nv.models.discreteBar = function() {
                     .text(function(d,i) { return valueFormat(valueLabel(d,i)) })
                     .watchTransition(renderWatch, 'discreteBar: bars text')
                     .attr('x', x.rangeBand() * .9 / 2)
-                    .attr('y', function(d,i) { return getY(d,i) < 0 ? y(getY(d,i)) - y(0) + 12 : -4 })
+                    .attr('y', function(d,i) { return getY(d,i) < 0 ? y(getY(d,i)) - y(0) + 12 + textYOffset : -4 })
 
                 ;
             } else {
@@ -4079,7 +4085,7 @@ nv.models.discreteBar = function() {
                 })
                 .select('rect')
                 .attr('height', function(d,i) {
-                    return  Math.max(Math.abs(y(getY(d,i)) - y(0)), minBarHeight)
+                    return  barHeight
                 });
 
 
